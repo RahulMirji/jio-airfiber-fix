@@ -1,0 +1,27 @@
+# /etc/config/sqm  -- CAKE for Jio AirFiber (~86/35 Mbps) behind an OpenWrt router
+# Change 'interface' to your WAN device (check with: ip -br link). Rates are kbit/s.
+# Then: /etc/init.d/sqm enable && /etc/init.d/sqm restart
+
+config queue 'wan'
+	option enabled '1'
+	option interface 'wan'            # e.g. 'wan' (Flint 2 vanilla OpenWrt) or 'eth1' (Beryl AX)
+	option download '75000'           # ~87% of 86 Mbps; cake-autorate will adjust it later
+	option upload '28000'             # ~80% of 35 Mbps; 5G uplink varies, start conservative
+	option qdisc 'cake'
+	option script 'layer_cake.qos'    # diffserv-aware CAKE (diffserv4 set below)
+	option qdisc_advanced '1'
+	option squash_dscp '0'            # keep DSCP marks for egress classification
+	option squash_ingress '1'         # ignore ISP-set DSCP on ingress
+	option ingress_ecn 'ECN'
+	option egress_ecn 'NOECN'
+	option qdisc_really_really_advanced '1'
+	option iqdisc_opts 'diffserv4 nat dual-dsthost ingress'
+	option eqdisc_opts 'diffserv4 nat dual-srchost ack-filter'
+	# Link-layer / overhead: generic Ethernet WAN feeding an unknown 5G radio
+	option linklayer 'ethernet'
+	option overhead '44'
+	option linklayer_advanced '1'
+	option tcMPU '84'
+	option linklayer_adaptation_mechanism 'default'
+	option debug_logging '0'
+	option verbosity '5'
